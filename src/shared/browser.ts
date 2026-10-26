@@ -1,5 +1,6 @@
 import { DEFAULT_PET, parsePet, parsePrefs, type Pet, type Preferences } from './model.ts';
 import { parseLanguage } from './locale.ts';
+import { visibleCompanions } from './companions.ts';
 type Storage = { get(keys: string[]): Promise<Record<string, unknown>>; set(values: Record<string, unknown>): Promise<void> };
 export type ExtensionAPI = {
   storage: { local: Storage; onChanged: { addListener(fn: (changes: Record<string, unknown>, area: string) => void): void; removeListener(fn: (changes: Record<string, unknown>, area: string) => void): void } };
@@ -9,9 +10,10 @@ export type ExtensionAPI = {
 export function extensionAPI(): ExtensionAPI | undefined { return (globalThis as unknown as { chrome?: ExtensionAPI }).chrome?.runtime?.id ? (globalThis as unknown as { chrome: ExtensionAPI }).chrome : undefined; }
 export async function readExtension() {
   const api = extensionAPI(); if (!api) throw new Error('เปิดหน้านี้ผ่านส่วนขยาย MongBo');
-  const data = await api.storage.local.get(['pet', 'preferences', 'collection', 'language']);
+  const data = await api.storage.local.get(['pet', 'preferences', 'collection', 'language', 'activeIds']);
   let pet: Pet = DEFAULT_PET; try { if (data.pet) pet = parsePet(data.pet); } catch { /* Recover corrupt local settings with a known safe pet. */ }
-  return { pet, preferences: parsePrefs(data.preferences), collection: safeCollection(data.collection), language: parseLanguage(data.language) };
+  const collection = safeCollection(data.collection);
+  return { pet, preferences: parsePrefs(data.preferences), collection, language: parseLanguage(data.language), activePets: visibleCompanions(pet, collection, data.activeIds) };
 }
 export function safeCollection(value: unknown): Pet[] {
   if (!Array.isArray(value)) return [];

@@ -27,13 +27,13 @@ export class PetActor {
   private walking = false;
   private onMenu?: (x: number, y: number) => void;
 
-  constructor(private container: HTMLElement, pet: Pet, options: { paused?: boolean; onMenu?: (x: number, y: number) => void } = {}) {
+  constructor(private container: HTMLElement, pet: Pet, options: { paused?: boolean; onMenu?: (x: number, y: number) => void; startFraction?: number } = {}) {
     this.pet = parsePet(pet); this.paused = options.paused ?? false; this.onMenu = options.onMenu;
     this.element = document.createElement('button'); this.element.type = 'button'; this.element.className = 'mb-pet';
     this.element.dataset.facing = 'right';
     container.append(this.element); this.render();
     this.areaWidth = container.clientWidth; this.areaHeight = container.clientHeight;
-    this.x = Math.max(0, (container.clientWidth - pet.size) / 2); this.y = this.floor;
+    this.x = Math.max(0, container.clientWidth - pet.size) * Math.max(0, Math.min(1, options.startFraction ?? .5)); this.y = this.floor;
     this.tx = this.x; this.element.dataset.motion = 'idle'; this.position();
     const signal = this.abort.signal;
     this.element.addEventListener('pointerdown', e => {
