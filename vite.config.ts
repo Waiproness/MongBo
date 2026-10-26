@@ -6,11 +6,13 @@ export default defineConfig({
   base: './', plugins: [react(), {
     name: 'local-extension-download',
     configureServer(server) {
-      server.middlewares.use('/downloads/mongbo-brave.zip', (_req, res) => {
-        const archive = resolve(import.meta.dirname, 'dist/site/downloads/mongbo-brave.zip');
+      server.middlewares.use('/downloads/', (req, res, next) => {
+        const filename = req.url?.split('?')[0]?.replace(/^\//, '');
+        if (!filename || !['mongbo-brave.zip', 'mongbo-chromium.zip'].includes(filename)) { next(); return; }
+        const archive = resolve(import.meta.dirname, 'dist/site/downloads', filename);
         if (!existsSync(archive)) { res.statusCode = 404; res.end('Extension not built yet'); return; }
         res.setHeader('Content-Type', 'application/zip');
-        res.setHeader('Content-Disposition', 'attachment; filename="mongbo-brave.zip"');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         createReadStream(archive).pipe(res);
       });
     },

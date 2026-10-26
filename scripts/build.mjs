@@ -20,4 +20,5 @@ await cp(resolve(root, 'dist/content/content.js'), resolve(root, 'dist/extension
 await mkdir(resolve(root, 'dist/site/downloads'), { recursive: true });
 // Python's standard zipfile module keeps packaging dependency-free on Windows.
 execFileSync('python', [resolve(root, 'scripts/zip_extension.py'), resolve(root, 'dist/extension'), resolve(root, 'dist/site/downloads/mongbo-brave.zip')], { stdio: 'inherit' });
+await cp(resolve(root, 'dist/site/downloads/mongbo-brave.zip'), resolve(root, 'dist/site/downloads/mongbo-chromium.zip'));
 console.log('MongBo ready: dist/site, dist/extension, dist/site/downloads/mongbo-brave.zip');

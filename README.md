@@ -27,6 +27,12 @@ npm run build
 
 ## ติดตั้งบน Brave
 
+Brave, Edge และ Opera ใช้ `mongbo-chromium.zip` ร่วมกันได้ แตกไฟล์แล้วเปิด `brave://extensions`, `edge://extensions` หรือ `opera://extensions` เปิด Developer mode กด Load unpacked เลือกโฟลเดอร์ที่มี `manifest.json` รีเฟรชแท็บเว็บไซต์เดิมหลังติดตั้ง
+
+Chrome ใช้ manifest Chromium เดียวกัน เว็บสตูดิโอทดสอบแล้ว แต่ยังไม่ได้ยืนยันส่วนขยายผ่านการติดตั้งจริงใน Chrome จึงยังไม่อยู่ในรายชื่อที่ทดสอบผ่าน ส่วน Firefox พักไว้ก่อน
+
+Build สร้าง `dist/extension` และ ZIP ใน `dist/site/downloads` ลิงก์ `mongbo-brave.zip` เดิมยังคงใช้ได้ ข้อมูลแต่ละเบราว์เซอร์แยกกัน ย้ายด้วยไฟล์ `.mongbo.json` ได้
+
 1. เปิด `brave://extensions`
 2. เปิด Developer mode
 3. กด **Load unpacked** เลือกโฟลเดอร์ `dist/extension` ที่มี `manifest.json`

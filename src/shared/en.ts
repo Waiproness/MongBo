@@ -336,5 +336,11 @@ export const EN: Readonly<Record<string, string>> = {
   "ชมพู": "Pink",
   "พีช": "Peach",
   "ทราย": "Sand",
-  "เทา": "Gray"
+  "เทา": "Gray",
+  "พามองโบ๋ไปเดินเล่นบน Brave, Edge และ Opera": "Take MongBo browsing in Brave, Edge and Opera.",
+  "เบราว์เซอร์ของคุณ": "Your browser",
+  "ดาวน์โหลด ZIP แล้วแตกลงโฟลเดอร์ใหม่ จากนั้นเปิด": "Download the ZIP, extract into a new folder, then open",
+  "เปิด Developer mode กด Load unpacked แล้วเลือกโฟลเดอร์ที่มี manifest.json": "Enable Developer mode, click Load unpacked, and select the folder containing manifest.json.",
+  "ดาวน์โหลดสำหรับ {0}": "Download for {0}",
+  "ส่งออกไฟล์ตัวละคร แล้วคลิกไอคอน MongBo ในเบราว์เซอร์ เลือก “นำเข้าตัวละคร”": "Export your character, then click MongBo in your browser and choose Import character.",
 };
