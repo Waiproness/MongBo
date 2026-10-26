@@ -1,0 +1,22 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
+import { createReadStream, existsSync } from 'node:fs';
+export default defineConfig({
+  base: './', plugins: [react(), {
+    name: 'local-extension-download',
+    configureServer(server) {
+      server.middlewares.use('/downloads/mongbo-brave.zip', (_req, res) => {
+        const archive = resolve(import.meta.dirname, 'dist/site/downloads/mongbo-brave.zip');
+        if (!existsSync(archive)) { res.statusCode = 404; res.end('Extension not built yet'); return; }
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', 'attachment; filename="mongbo-brave.zip"');
+        createReadStream(archive).pipe(res);
+      });
+    },
+  }],
+  build: { outDir: 'dist/site', rollupOptions: { input: {
+    studio: resolve(import.meta.dirname, 'index.html'),
+    popup: resolve(import.meta.dirname, 'popup.html'),
+  } } },
+});

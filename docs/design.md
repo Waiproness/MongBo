@@ -1,0 +1,45 @@
+# MongBo — มองโบ๋
+
+For introverts in IT who want quiet company while working or browsing. No care streaks, notifications, accounts, or AI service required.
+
+## First release
+
+- Browser-based character studio with 16 original vector species, arbitrary HEX/native colors, 20 faces, 15 outfits, 19 head accessories, six eyewear choices, names, size and energy. Clothing/headwear/eyewear are independent layers.
+- A 32 × 32 pixel character canvas with pen, eraser, flood fill, eyedropper, brush sizes, undo/redo, keyboard and pointer input. Auto-saved drawing draft, live preview and portable character export. Custom characters share the room and extension animation engine.
+- Clothing fits species-specific torso anchors and clips to the actual body artwork. Foreground limbs cover the garment; capes render behind the body. Headwear and eyewear fit their own anchors. Each layer supports persisted x/y offsets and independent width/height scaling, with a reset to anatomical defaults. Custom art anchors derive from occupied pixels.
+- Custom speech supports 20 plain-text messages of up to 120 characters, edit/delete/preview, click-to-cycle and opt-in timed cycling (15–180 seconds). Messages travel with the character. Bubbles live beside the actor, survive SVG updates, wrap and clamp to room/viewport edges; timers stop on destruction and skip hidden tabs. Portable file cap is 32 KiB to cover dense pixel art plus Thai speech.
+- Walking has distinct left/right contact and lift phases, foreground feet, a subtle body sway, and an energy-based step cycle. Synthetic arms have been removed. Only six characters with existing ears (cat, bunny, bear, fox, panda, puppy) receive ear movement. Original wings/hardware remain static. Clothing follows the torso. Hand-drawn art keeps its original image without synthetic limbs. Reduced motion disables the gait.
+- Web theme preference is Light/Dark/System, saved separately from character data. System follows live OS changes; explicit choices override OS. Dark mode changes the workspace and illustrated room, preserving character colors.
+- Footer credits WaiTy and offers a small discoverable “ความลับของชื่อ” button. Its dialog records the creator's introversion, long computer sessions, and the name's origin in their late dog โบ้ / โบ๋, without adding biographical details.
+- Live room to walk in; drag, click, pause and call your companion.
+- Roaming stays on the bottom floor of the room or browser viewport. Characters with feet use the reference image's plump, level feet tucked into the lower body, including the blob. Foot shapes overlap the torso at rest and remain visible in front during the current alternating step animation; the keyframes are unchanged. Ghost, mushroom and octopus have no synthetic feet, and custom art keeps its original anatomy. Dragging lifts the pet; release applies bounded gravity, a scared face, then landing squash and a brief dizzy face. Temporary reactions never mutate the saved mood. Custom drawings get an external reaction mark without painting over their face. Pause/zero energy stop roaming while gravity still settles a released pet; reduced motion returns it to the floor immediately. Resize anchors grounded pets to the new floor.
+- The footer links to the creator's GitHub at https://github.com/Waiproness.
+- Local collection, JSON import/export, PNG portrait export.
+- Manifest V3 extension for Brave/Chrome/Edge: the same studio bundled offline, a companion on ordinary HTTP(S) pages, global and per-site visibility controls.
+- Web-to-extension transfer uses an explicit portable character file; inside the extension, Save writes directly to extension storage. No page can silently replace a character through a bridge.
+
+## Design choices
+
+Claymorphism: lavender workspace (#eeeaf5), cloud surfaces (#f9f7fc), plum ink (#40394f), lilac (#ddcef2), mint (#deeddf), and peach (#f3d2be). Existing self-hosted Nunito and Noto Sans Thai keep the typography rounded and readable. Broad room and editor trays use large rounded corners, thick highlight rims, and inner/outer shadows from a consistent upper-left light source. Smaller controls have tighter depth; selected controls sink into the surface, with checkmarks and existing pressed states. The room gets a recessed frame while pet artwork keeps its own colors. Dark mode uses plum surfaces and restrained highlights. No decorative background animation; pressed/hover motion respects reduced motion. Shared tokens cover the studio, collection, speech, wardrobe, dialogs and drawing editor. Layouts adapt from 320px mobile to desktop. Quiet Thai copy and existing workflows remain.
+
+## Architecture
+
+EN/TH is a separate local preference (`mongbo.language`), defaulting to Thai. A shared source-text catalog supplies English interface copy, catalog labels, validation messages and dynamic labels with preserved placeholders. React subscribes to a small locale store: switching updates mounted components and document language/title without reloading or remounting editors or actors. Personal names, saved speech and drawing pixels remain data, never translation keys. Default unsaved speech can follow the interface language. Same-origin tabs sync through storage events. Extension studio language is also saved in extension storage for popup/content menus and actor accessibility labels; injected overlays change their own copy without changing the host page's language or title. No external translation service or added runtime dependency.
+
+Facing is runtime state, separate from position and saved character data. An inner SVG group mirrors the body, clothing and stride for leftward movement, with a small directional lean/gaze; bubbles live outside it and stay readable. A separate outer swing layer follows filtered horizontal pointer velocity through a damped spring, including real-ear response. The swing unwinds after release while bounded horizontal momentum decays during gravity; viewport edges damp the drift. The current foot shapes, step keyframes and fall/landing reactions stay intact. Paused roaming still allows manual swinging; reduced motion suppresses swing/drift and settles immediately. All motion shares the actor's existing RAF and cleanup.
+
+Site color is independent of brightness mode: six presets (purple, blue, pink, peach, sand, gray) plus native color selection/HEX. `mongbo.site-color` stores a validated color separately from `mongbo.theme`. Generated light/dark tokens tint the clay surfaces while keeping readable foregrounds, and update on mode changes without losing the color. Controls sync across same-origin tabs and keep working for the visit if storage is unavailable. The illustrated room uses neutral warm walls/floor/trim, with palette-colored rug and sky accents; no whole-room green cast or character recoloring. The palette disclosure supports keyboard Escape, outside dismissal and narrow screens. No change to portable character data.
+
+React, TypeScript and Vite power the studio and extension popup. Procedural SVG characters avoid external art dependencies. Shared schema, rendering and animation modules run in both studio and extension. Node standard library handles tests; Python standard zipfile packages the extension. LocalStorage keeps the web collection; chrome.storage.local keeps the extension pet and preferences.
+
+## Limits
+
+Browser-owned pages, extension stores and some protected viewers prohibit injected companions. No desktop overlay outside the browser. Character building uses curated parts or a single hand-drawn pixel frame, not generative AI or arbitrary sprite upload. Drawn art bobs/moves as a whole; no frame animation editor. No cloud synchronization. Extension installation is a manual user step. Version 1 character files remain compatible through defaults for new wardrobe fields; drawn images contain validated color cells, never user-supplied SVG markup.
+
+## Verification
+
+Character artwork uses neutral gray outlines and details across the shared renderer, wardrobe and original limbs. Panda ears/eye patches, puppy nose, garment trims, sunglass lenses and visor tints have no baked-in green cast; the preset sage swatch is warm sand. Owner-chosen colors and hand-drawn pixels are preserved. Browser raster checks cover all species/outfits/headwear/eyewear on neutral and ivory bodies, including alpha-composited eyewear, plus visible garments and actual transparent PNG export.
+
+Schema and bounds tests; syntax and package checks; browser checks of customization, collection persistence, import/export, movement/drag/pause, responsive layout, reduced motion, and extension storage controls in an isolated test browser where supported.
+
+Preview regression: imperative actors receive the current render function from React on updates; their lifecycle follows actor module identity during Fast Refresh. This prevents a live room retaining a four-species renderer while React thumbnails use the newer catalog. Browser regression checks actual room bodies across all species, plus rasterized clothing pixels rather than markup alone.
