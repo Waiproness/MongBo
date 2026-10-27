@@ -357,4 +357,10 @@ export const EN: Readonly<Record<string, string>> = {
   "ติดตั้งส่วนขยาย MongBo ครั้งแรกด้วย ZIP": "First, install the MongBo extension using the ZIP",
   "ส่งออก JSON แล้วเปิดไอคอน MongBo เลือก “นำเข้าตัวละครจากเว็บ” ตัวใหม่จะเพิ่มเข้าคลังและเดินพร้อมตัวเดิม ไม่ต้องติดตั้งส่วนขยายใหม่": "Export JSON, open MongBo and choose Import character from website. The new friend joins your existing friends. No need to reinstall the extension.",
   "รีเฟรชแท็บหลังติดตั้งครั้งแรก ใน popup เปิดหรือปิดสวิตช์เพื่อนแต่ละตัวเพื่อแสดงหรือซ่อน กดลบและยืนยันเพื่อนำออกจากคลัง": "Refresh tabs after the first install. In the popup, toggle each friend to show or hide them. Click Delete and confirm to remove a friend from the library.",
+  "เพื่อนบนเดสก์ท็อป": "Desktop friends",
+  "ลบจากคลังเดสก์ท็อป?": "Delete from the desktop library?",
+  "น้องพร้อมอยู่บนเดสก์ท็อปแล้ว": "Your friend is ready on the desktop.",
+  "แสดงบนเดสก์ท็อป": "Show on desktop",
+  "เพื่อนอยู่ด้วยบนเดสก์ท็อป": "A friend for your desktop",
+  "บันทึกเพื่อนแล้วกดแสดงบนเดสก์ท็อป จัดการทุกตัวได้จากเมนูข้างนาฬิกา": "Save your friend and click Show on desktop. Manage everyone from the tray menu beside the clock.",
 };

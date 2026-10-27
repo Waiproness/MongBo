@@ -1,13 +1,14 @@
 import { DEFAULT_PET, parsePet, parsePrefs, type Pet, type Preferences } from './model.ts';
 import { parseLanguage } from './locale.ts';
 import { visibleCompanions } from './companions.ts';
+import { desktopBridge } from '../desktop-api.ts';
 type Storage = { get(keys: string[]): Promise<Record<string, unknown>>; set(values: Record<string, unknown>): Promise<void> };
 export type ExtensionAPI = {
   storage: { local: Storage; onChanged: { addListener(fn: (changes: Record<string, unknown>, area: string) => void): void; removeListener(fn: (changes: Record<string, unknown>, area: string) => void): void } };
   runtime: { id: string; getURL(path: string): string; sendMessage(message: unknown): Promise<unknown> };
   tabs: { create(details: { url: string }): Promise<unknown>; query(details: { active: boolean; currentWindow: boolean }): Promise<{ url?: string; id?: number }[]> };
 };
-export function extensionAPI(): ExtensionAPI | undefined { return (globalThis as unknown as { chrome?: ExtensionAPI }).chrome?.runtime?.id ? (globalThis as unknown as { chrome: ExtensionAPI }).chrome : undefined; }
+export function extensionAPI(): ExtensionAPI | undefined { return desktopBridge()?.api ?? ((globalThis as unknown as { chrome?: ExtensionAPI }).chrome?.runtime?.id ? (globalThis as unknown as { chrome: ExtensionAPI }).chrome : undefined); }
 export async function readExtension() {
   const api = extensionAPI(); if (!api) throw new Error('เปิดหน้านี้ผ่านส่วนขยาย MongBo');
   const data = await api.storage.local.get(['pet', 'preferences', 'collection', 'language', 'activeIds']);

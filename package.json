@@ -1,24 +1,33 @@
 {
   "name": "mongbo",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "description": "MongBo — มองโบ๋ เพื่อนตัวเล็กสำหรับวันทำงาน",
   "scripts": {
+    "desktop:build": "tsc -b && node scripts/build-desktop.mjs",
+    "desktop:start": "electron dist/desktop-app",
+    "desktop:pack": "tsc -b && node scripts/build-desktop.mjs --pack",
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "build": "tsc -b && node scripts/build.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "check": "tsc -b --pretty false",
     "deploy:cloudflare": "npm exec --yes --package=wrangler@4.149.0 -- wrangler pages deploy dist/site --project-name=mongbo --branch=main"
   },
-  "dependencies": { "react": "19.3.1", "react-dom": "19.3.1" },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
   "devDependencies": {
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "electron": "45.0.0",
     "typescript": "7.0.2",
     "vite": "8.3.5"
   },
-  "engines": { "node": ">=24" }
+  "engines": {
+    "node": ">=24"
+  }
 }

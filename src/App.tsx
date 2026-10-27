@@ -13,6 +13,7 @@ import { WardrobeEditor } from './components/WardrobeEditor.tsx';
 import { DrawingEditor } from './components/DrawingEditor.tsx';
 import { SpeechEditor } from './components/SpeechEditor.tsx';
 import { ThemePicker } from './components/ThemePicker.tsx';
+import { desktopBridge } from './desktop-api.ts';
 import { BrowserSetup } from './components/BrowserSetup.tsx';
 import { SiteColorPicker } from './components/SiteColorPicker.tsx';
 
@@ -31,28 +32,39 @@ export function App() {
   const [speechPreview, setSpeechPreview] = useState<{ text: string; id: number }>();
   const [savedId, setSavedId] = useState(''), [busy, setBusy] = useState(false);
   const file = useRef<HTMLInputElement>(null), noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const api = extensionAPI();
+  const api = extensionAPI(), desktop = !!desktopBridge();
   function tell(message: string) { clearTimeout(noticeTimer.current); setNotice(message); noticeTimer.current = setTimeout(() => setNotice(''), 4200); }
   useEffect(() => { if (!api) return; readExtension().then(data => { setLanguage(data.language); setPet(data.pet); setCollection(data.collection); setReady(true); }).catch(() => { setReady(true); tell('โหลดข้อมูลส่วนขยายไม่ได้ ลองปิดแล้วเปิดหน้านี้ใหม่'); }); }, []);
+  useEffect(() => {
+    if (!api) return;
+    let closed = false;
+    const changed = () => { void readExtension().then(data => { if (!closed) { setCollection(data.collection); setLanguage(data.language); } }).catch(() => {}); };
+    api.storage.onChanged.addListener(changed);
+    return () => { closed = true; api.storage.onChanged.removeListener(changed); };
+  }, []);
   useEffect(() => { if (!ready || api) return; try { localStorage.setItem('mongbo.draft', JSON.stringify(pet)); } catch { tell('พื้นที่เก็บข้อมูลไม่พร้อม ส่งออกไฟล์เพื่อเก็บตัวละครไว้'); } }, [pet, ready]);
   useEffect(() => () => clearTimeout(noticeTimer.current), []);
   function change<K extends keyof PetData>(key: K, value: PetData[K]) { setPet(p => ({ ...p, [key]: value })); setSavedId(''); }
   async function save(use = false) {
     if (busy || !ready) return;
     try {
-      setBusy(true); const validated = parsePet(pet), next = upsertPet(collection, validated);
-      if (api) { const data = await readExtension(); await api.storage.local.set({ pet: validated, collection: next, ...(use ? { activeIds: [...new Set([...data.activePets.map(p => p.id), validated.id])] } : {}) }); }
+      setBusy(true); const validated = parsePet(pet);
+      const data = api ? await readExtension() : null;
+      const existing = data ? [...data.collection, ...data.activePets.filter(p => !data.collection.some(c => c.id === p.id))] : collection;
+      const next = upsertPet(existing, validated);
+      if (api && data) await api.storage.local.set({ pet: validated, collection: next, ...(use ? { activeIds: [...new Set([...data.activePets.map(p => p.id), validated.id])] } : {}) });
       else localStorage.setItem('mongbo.collection', JSON.stringify(next));
       setCollection(next); setPet(validated); setSavedId(validated.id);
       if (use && !api) setModal('setup');
-      tell(use && api ? 'น้องพร้อมไปเป็นเพื่อนแล้ว เปิดเว็บอื่นได้เลย' : 'เก็บเพื่อนตัวนี้ไว้แล้ว ♡');
+      tell(use && api ? desktop ? 'น้องพร้อมอยู่บนเดสก์ท็อปแล้ว' : 'น้องพร้อมไปเป็นเพื่อนแล้ว เปิดเว็บอื่นได้เลย' : 'เก็บเพื่อนตัวนี้ไว้แล้ว ♡');
     } catch (e) { tell(e instanceof Error ? e.message : 'บันทึกไม่ได้ กรุณาส่งออกไฟล์เก็บไว้'); }
     finally { setBusy(false); }
   }
   async function remove(id: string) {
     try {
-      const next = collection.filter(p => p.id !== id);
-      if (api) await api.storage.local.set({ collection: next }); else localStorage.setItem('mongbo.collection', JSON.stringify(next));
+      const data = api ? await readExtension() : null;
+      const next = (data?.collection ?? collection).filter(p => p.id !== id);
+      if (api && data) await api.storage.local.set({ collection: next, activeIds: data.activePets.filter(p => p.id !== id).map(p => p.id) }); else localStorage.setItem('mongbo.collection', JSON.stringify(next));
       setCollection(next); tell('นำออกจากคลังแล้ว ตัวที่กำลังแต่งยังอยู่');
     } catch { tell('แก้ไขคลังไม่ได้ กรุณาลองใหม่'); }
   }
@@ -74,7 +86,7 @@ export function App() {
   return <>
     <header className="site-header"><a className="brand" href="./" aria-label={tr("MongBo หน้าหลัก")}><Pet pet={{ ...DEFAULT_PET, accessory: 'none' }}/><strong>MongBo<span>{tr("มองโบ๋")}</span></strong></a>
       <nav aria-label={tr("เมนูหลัก")}><button className={tab === 'studio' ? 'nav-link active' : 'nav-link'} onClick={() => setTab('studio')}><Icon name="spark" size={17}/>{tr("สร้างเพื่อน")}</button><button className={tab === 'collection' ? 'nav-link active' : 'nav-link'} onClick={() => setTab('collection')}><Icon name="grid" size={17}/>{tr("เพื่อนของฉัน")}{collection.length > 0 && <span className="count">{collection.length}</span>}</button></nav>
-      <div className="header-actions"><LanguagePicker/><SiteColorPicker/><ThemePicker/><button className="header-button" onClick={() => setModal('setup')}><Icon name="globe" size={17}/><span>{tr("พาไปท่องเว็บ")}</span><Icon name="arrow" size={16}/></button></div>
+      <div className="header-actions"><LanguagePicker/><SiteColorPicker/><ThemePicker/><button className="header-button" onClick={() => desktop ? void api?.runtime.sendMessage({ type: 'mongbo-open-library' }) : setModal('setup')}><Icon name="globe" size={17}/><span>{tr(desktop ? 'เพื่อนบนเดสก์ท็อป' : 'พาไปท่องเว็บ')}</span><Icon name="arrow" size={16}/></button></div>
     </header>
     <main>
       <div className="intro"><div><div className="intro-note"><span/> a little company, a lot of comfort</div><h1>{tab === 'studio' ? tr("เพื่อนตัวเล็ก ในโลกของคุณ") : tr("ทุกตัว มีที่พักตรงนี้")}</h1><p>{tab === 'studio' ? tr("สร้างมองโบ๋ในแบบคุณ แล้วให้วันธรรมดามีเพื่อนอยู่ข้าง ๆ") : tr("เพื่อนที่คุณสร้างไว้ พร้อมกลับไปท่องเว็บด้วยกันเสมอ")}</p></div><div className="intro-sticker"><Icon name="leaf" size={19}/><span>{tr("อยู่เป็นเพื่อน")}<br/><b>{tr("ไม่ต้องชวนคุยก็ได้")}</b></span></div></div>
@@ -86,7 +98,7 @@ export function App() {
         {section === 'look' ? <AppearanceEditor pet={pet} onChange={change} draw={() => setModal('draw')}/> : section === 'wardrobe' ? <WardrobeEditor pet={pet} onChange={change}/> : section === 'speech' ? <SpeechEditor value={pet.speech} onChange={speech => change('speech', speech)} preview={text => setSpeechPreview(previous => ({ text, id: (previous?.id ?? 0) + 1 }))}/> : <div className="editor-body vibe-panel" role="tabpanel" aria-labelledby="vibe-tab" id="vibe-panel"><label className="field-label" htmlFor="pet-name">{tr("อยากเรียกน้องว่าอะไร")}</label><input id="pet-name" value={pet.name} maxLength={24} onChange={e => change('name', e.target.value)} placeholder={tr("ชื่อเพื่อนคนใหม่")}/><p className="field-help">{tr("ชื่อสั้น ๆ ที่เรียกแล้วรู้สึกดี · ไม่เกิน 24 ตัวอักษร")}</p><label className="field-label" htmlFor="pet-size">{tr("ตัวเล็กหรือตัวโต")}<span>{pet.size} px</span></label><input id="pet-size" type="range" min="64" max="160" value={pet.size} onChange={e => change('size', Number(e.target.value))}/><div className="range-labels"><span>{tr("จิ๋วพอดีมุม")}</span><span>{tr("กอดเต็มมือ")}</span></div><label className="field-label" htmlFor="pet-energy">{tr("ความซน")}<span>{pet.energy}%</span></label><input id="pet-energy" type="range" min="0" max="100" value={pet.energy} onChange={e => change('energy', Number(e.target.value))}/><div className="range-labels"><span>{tr("นั่งเป็นเพื่อน")}</span><span>{tr("ขอวิ่งเล่นหน่อย")}</span></div><div className="vibe-note"><Icon name="heart"/><p>{tr("น้องไม่เหงาถ้าคุณยุ่ง")}<br/>{tr("กลับมาเล่นด้วยเมื่อพร้อมก็พอ")}</p></div></div>}
         <div className="editor-bottom"><button className="primary-button" onClick={() => save()} disabled={busy || !ready}><Icon name={savedId === pet.id ? 'check' : 'heart'} size={19}/>{savedId === pet.id ? tr("เก็บไว้แล้ว") : tr("เก็บเพื่อนตัวนี้")}</button><div className="editor-tools"><button onClick={exportPet}><Icon name="download" size={15}/>{tr("ส่งออก")}</button><span/><button onClick={() => file.current?.click()}><Icon name="upload" size={15}/>{tr("นำเข้า")}</button></div></div>
       </aside></div> : <section className="collection"><div className="collection-top"><h2>{tr("คลังเพื่อน ")}<span>{collection.length}/30</span></h2><div><button className="small-button" onClick={() => file.current?.click()}><Icon name="upload" size={16}/>{tr("นำเข้า")}</button><button className="primary-button" onClick={() => { setPet({ ...DEFAULT_PET, id: crypto.randomUUID(), name: tr("เพื่อนคนใหม่") }); setSavedId(''); setTab('studio'); }}><Icon name="plus" size={17}/>{tr("สร้างเพื่อนใหม่")}</button></div></div>{collection.length ? <div className="collection-grid">{collection.map(p => <article className="saved-pet" key={p.id}><div className="saved-art" style={{ background: `${p.color}28` }}><Pet pet={p}/></div><h3>{p.name}</h3><p>{tr(LABELS[p.species])} · {tr(LABELS[p.face])}</p><div><button className="small-button" onClick={() => { setPet(p); setSavedId(p.id); setTab('studio'); }}>{tr("แต่งต่อ")}<Icon name="arrow" size={15}/></button><button className="round-button" aria-label={tr("นำ {0} ออกจากคลัง", p.name)} onClick={() => remove(p.id)}><Icon name="trash" size={16}/></button></div></article>)}</div> : <div className="empty-state"><Pet pet={DEFAULT_PET}/><h3>{tr("เพื่อนคนแรก กำลังรอคุณอยู่")}</h3><p>{tr("ลองสร้างตัวละคร แล้วกด “เก็บเพื่อนตัวนี้”")}</p><button className="primary-button" onClick={() => setTab('studio')}>{tr("ไปสร้างเพื่อน")}<Icon name="arrow" size={17}/></button></div>}</section>}
-      <section className="take-along"><div className="take-icon"><Icon name="globe" size={25}/></div><div><h2>{tr("ไม่ว่าคุณจะเปิดแท็บไหน ก็มีเพื่อนไปด้วย")}</h2><p>{tr("พามองโบ๋ไปเดินเล่นบน Brave, Edge และ Opera")}</p></div><button className="dark-button" onClick={() => save(true)} disabled={busy || !ready}>{tr("พาน้องไปด้วย")}<Icon name="arrow" size={18}/></button></section>
+      <section className="take-along"><div className="take-icon"><Icon name="globe" size={25}/></div><div><h2>{tr(desktop ? 'เพื่อนอยู่ด้วยบนเดสก์ท็อป' : 'ไม่ว่าคุณจะเปิดแท็บไหน ก็มีเพื่อนไปด้วย')}</h2><p>{tr(desktop ? 'บันทึกเพื่อนแล้วกดแสดงบนเดสก์ท็อป จัดการทุกตัวได้จากเมนูข้างนาฬิกา' : 'พามองโบ๋ไปเดินเล่นบน Brave, Edge และ Opera')}</p></div><button className="dark-button" onClick={() => save(true)} disabled={busy || !ready}>{tr(desktop ? 'แสดงบนเดสก์ท็อป' : 'พาน้องไปด้วย')}<Icon name="arrow" size={18}/></button></section>
     </main><footer><span className="footer-brand">MongBo <span>small friend, soft days.</span></span><span className="footer-owner">{tr("สร้างและดูแลโดย ")}<strong>WaiTy</strong><a className="footer-github" href="https://github.com/Waiproness" target="_blank" rel="noopener noreferrer" aria-label={tr("GitHub ของ WaiTy (เปิดแท็บใหม่)")}>GitHub ↗</a></span><button className="story-secret" title={tr("ชื่อมองโบ๋มาจากไหน?")} onClick={() => setModal('about')}>{tr("ความลับของชื่อ")}<Icon name="heart" size={13}/></button></footer>
     <input ref={file} type="file" accept=".json,.mongbo.json,application/json" hidden onChange={importPet} aria-label={tr("ไฟล์ตัวละคร")}/>
     <div className={notice ? 'toast visible' : 'toast'} role="status" aria-live="polite">{notice && <><Icon name="leaf" size={18}/>{tr(notice)}</>}</div>

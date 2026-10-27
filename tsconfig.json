@@ -6,5 +6,5 @@
     "strict": true, "noEmit": true, "skipLibCheck": true,
     "types": ["vite/client", "node"]
   },
-  "include": ["src", "vite.config.ts", "vite.content.config.ts"]
+  "include": ["src", "desktop/state.ts", "vite.config.ts", "vite.content.config.ts"]
 }

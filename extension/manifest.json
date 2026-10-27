@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MongBo — มองโบ๋",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "description": "เพื่อนตัวเล็กสำหรับวันทำงาน สร้างตัวละครของคุณ แล้วพาไปเดินเล่นบนเว็บไซต์",
   "permissions": ["storage", "activeTab"],
   "background": { "service_worker": "background.js" },
