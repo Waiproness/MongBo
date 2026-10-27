@@ -1,6 +1,6 @@
 import { bounds, DEFAULT_SPEECH, parsePet, type Pet } from './model.ts';
 import { petSVG } from './art.ts';
-import { floorY, fallStep, swayStep, driftStep } from './motion.ts';
+import { floorY, swayStep, releaseVelocity, projectileStep } from './motion.ts';
 import { tr } from './locale.ts';
 
 type Motion = 'idle' | 'walking' | 'held' | 'falling' | 'landing';
@@ -13,6 +13,7 @@ export class PetActor {
   private tx = 0; private raf = 0; private last = 0; private next = 0;
   private velocityY = 0; private landingUntil = 0; private state: Motion = 'idle';
   private velocityX = 0; private dragSpeed = 0; private dragLast = 0;
+  private throwX = 0; private throwY = 0;
   private sway = 0; private swayVelocity = 0;
   private renderer = petSVG;
   private dragging = false; private moved = false; private offsetX = 0; private offsetY = 0;
@@ -39,7 +40,7 @@ export class PetActor {
     this.element.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       this.dragging = true; this.moved = false; this.velocityY = 0; this.velocityX = 0;
-      this.dragSpeed = 0; this.dragLast = performance.now();
+      this.dragSpeed = 0; this.throwX = 0; this.throwY = 0; this.dragLast = performance.now();
       const rect = this.element.getBoundingClientRect(); this.offsetX = e.clientX - rect.left; this.offsetY = e.clientY - rect.top;
       this.element.setPointerCapture(e.pointerId); this.setMotion('held');
     }, { signal });
@@ -48,17 +49,22 @@ export class PetActor {
       const rect = container.getBoundingClientRect();
       const point = bounds(e.clientX - rect.left - this.offsetX, e.clientY - rect.top - this.offsetY, container.clientWidth, container.clientHeight, this.pet.size);
       if (Math.hypot(point.x - this.x, point.y - this.y) > 2) this.moved = true;
-      const now = performance.now(), dx = point.x - this.x;
-      const speed = Math.max(-1800, Math.min(1800, dx / Math.max(.008, (now - this.dragLast) / 1000)));
+      const now = performance.now(), dx = point.x - this.x, dy = point.y - this.y;
+      const elapsed = Math.max(.008, (now - this.dragLast) / 1000);
+      const speed = Math.max(-1800, Math.min(1800, dx / elapsed));
+      const weight = Math.min(1, elapsed * 40);
+      this.throwX += (speed - this.throwX) * weight;
+      this.throwY += (Math.max(-1800, Math.min(1800, dy / elapsed)) - this.throwY) * weight;
       this.dragSpeed += (speed - this.dragSpeed) * .45; this.dragLast = now;
       this.setFacing(dx);
       this.x = point.x; this.y = point.y; this.position();
     }, { signal });
-    const release = () => {
+    const release = (event: PointerEvent) => {
       if (!this.dragging) return;
       this.dragging = false;
-      this.velocityX = Math.max(-180, Math.min(180, this.dragSpeed * .12)); this.dragSpeed = 0;
-      this.tx = this.x; this.next = performance.now() + 3000; this.drop();
+      const velocity = event.type === 'pointerup' ? releaseVelocity(this.throwX, this.throwY, (performance.now() - this.dragLast) / 1000) : { x: 0, y: 0 };
+      this.velocityX = velocity.x; this.dragSpeed = 0;
+      this.tx = this.x; this.next = performance.now() + 3000; this.drop(velocity.y);
     };
     this.element.addEventListener('pointerup', release, { signal });
     this.element.addEventListener('pointercancel', release, { signal });
@@ -75,7 +81,7 @@ export class PetActor {
       this.drop(); this.position();
     }, { signal });
     this.observer = new ResizeObserver(() => this.clamp()); this.observer.observe(container);
-    document.addEventListener('visibilitychange', () => { this.last = 0; this.dragSpeed = 0; this.dragLast = performance.now(); }, { signal });
+    document.addEventListener('visibilitychange', () => { this.last = 0; this.dragSpeed = 0; this.throwX = 0; this.throwY = 0; this.dragLast = performance.now(); }, { signal });
     window.addEventListener('mongbo-languagechange', () => this.accessibility(), { signal });
     this.motion.addEventListener('change', () => { if (this.motion.matches && !this.dragging) this.drop(); }, { signal });
     this.raf = requestAnimationFrame(this.frame);
@@ -114,9 +120,9 @@ export class PetActor {
     this.setWalking(value === 'walking');
     if (reaction !== this.reaction) this.render();
   }
-  private drop() {
-    this.velocityY = 0;
-    if (this.motion.matches || this.y >= this.floor) { this.y = this.floor; this.velocityX = 0; this.setMotion('idle'); this.position(); }
+  private drop(velocityY = 0) {
+    this.velocityY = velocityY;
+    if (this.motion.matches || (this.y >= this.floor && velocityY >= 0)) { this.y = this.floor; this.velocityY = 0; this.velocityX = 0; this.setMotion('idle'); this.position(); }
     else this.setMotion('falling');
   }
   private setFacing(dx: number) { if (Math.abs(dx) >= 1) this.element.dataset.facing = dx < 0 ? 'left' : 'right'; }
@@ -145,12 +151,11 @@ export class PetActor {
     if (!document.hidden) this.swing(delta);
     if (!document.hidden && !this.dragging) {
       if (this.state === 'falling') {
-        const fall = fallStep(this.y, this.velocityY, this.floor, delta);
-        const drift = driftStep(this.x, this.velocityX, this.container.clientWidth, this.pet.size, delta);
-        if (this.tx === this.x) this.tx = drift.x;
-        this.x = drift.x; this.velocityX = drift.velocity;
-        this.y = fall.y; this.velocityY = fall.velocity;
-        if (fall.landed) { this.velocityX = 0; this.landingUntil = time + 420; this.next = Math.max(this.next, time + 900); this.setMotion('landing'); }
+        const flight = projectileStep(this.x, this.y, this.velocityX, this.velocityY, this.container.clientWidth, this.container.clientHeight, this.pet.size, delta);
+        if (this.tx === this.x) this.tx = flight.x;
+        this.x = flight.x; this.velocityX = flight.vx;
+        this.y = flight.y; this.velocityY = flight.vy; this.setFacing(this.velocityX);
+        if (flight.landed) { this.velocityX = 0; this.landingUntil = time + 420; this.next = Math.max(this.next, time + 900); this.setMotion('landing'); }
         this.position();
       } else if (this.state === 'landing' && time < this.landingUntil) {
         this.setWalking(false);
