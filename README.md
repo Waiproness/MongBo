@@ -5,7 +5,7 @@
 | เลือกแบบไหน | น้องอยู่ที่ไหน | เริ่มใช้งาน |
 | --- | --- | --- |
 | **MongBo Desktop** | บน Desktop ของ Windows แม้ปิดเบราว์เซอร์ | [ดาวน์โหลด ZIP สำหรับ Windows x64](https://github.com/Waiproness/MongBo/releases/download/v0.10.0/MongBo-Desktop-0.10.0-windows-x64.zip) |
-| **MongBo X10** | บนหน้าเว็บใน Brave, Edge และ Opera | [เปิดเว็บสร้างตัวละคร](https://mongbo-8nr.pages.dev/) · [ดาวน์โหลด Extension ZIP](https://github.com/Waiproness/MongBo/releases/download/v0.10.0/MongBo-X10-0.10.0.zip) |
+| **MongBo X10** | บนหน้าเว็บใน Brave, Edge และ Opera | [เปิดเว็บสร้างตัวละคร](https://mongbo-8nr.pages.dev/) · [ดาวน์โหลด Extension ZIP](https://mongbo-8nr.pages.dev/downloads/mongbo-chromium.zip) |
 
 ## MongBo Desktop
 
