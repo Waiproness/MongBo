@@ -1,0 +1,17 @@
+appId: com.waity.mongbo
+productName: MongBo
+executableName: MongBo
+directories:
+  output: dist/portable
+compression: maximum
+publish: null
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  signAndEditExecutable: false
+portable:
+  artifactName: MongBo-Portable-${version}-windows-x64.exe
+  requestExecutionLevel: user
+  unpackDirName: false

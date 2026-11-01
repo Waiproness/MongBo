@@ -4,17 +4,17 @@
 
 | เลือกแบบไหน | น้องอยู่ที่ไหน | เริ่มใช้งาน |
 | --- | --- | --- |
-| **MongBo Desktop** | บน Desktop ของ Windows แม้ปิดเบราว์เซอร์ | [ดาวน์โหลด ZIP สำหรับ Windows x64](https://github.com/Waiproness/MongBo/releases/download/v0.10.0/MongBo-Desktop-0.10.0-windows-x64.zip) |
+| **MongBo Desktop** | บน Desktop ของ Windows แม้ปิดเบราว์เซอร์ | [ดาวน์โหลด Portable.exe สำหรับ Windows x64](https://github.com/Waiproness/MongBo/releases/download/v0.10.1/MongBo-Portable-0.10.1-windows-x64.exe) |
 | **MongBo X10** | บนหน้าเว็บใน Brave, Edge และ Opera | [เปิดเว็บสร้างตัวละคร](https://mongbo-8nr.pages.dev/) · [ดาวน์โหลด Extension ZIP](https://mongbo-8nr.pages.dev/downloads/mongbo-chromium.zip) |
 
 ## MongBo Desktop
 
-1. ดาวน์โหลด ZIP แล้ว **แตกไฟล์ทั้งหมด** ลงโฟลเดอร์ถาวร
-2. เปิด **MongBo.exe** ในโฟลเดอร์ที่แตก ไม่ต้องติดตั้ง Electron หรือ Node.js เพิ่ม
+1. ดาวน์โหลด **MongBo Portable.exe** จากลิงก์ด้านบน
+2. ดับเบิลคลิกเปิดได้เลย **ไม่ต้องติดตั้งหรือแตก ZIP** และไม่ต้องติดตั้ง Electron / Node.js เพิ่ม การเปิดครั้งแรกอาจใช้เวลาสักครู่
 3. เปิดสตูดิโอเพื่อสร้างเพื่อน หรือกด **นำเข้าตัวละครจากเว็บ** เพื่อเพิ่มไฟล์ `.mongbo.json`
 4. คลิกขวาไอคอน MongBo ข้างนาฬิกา เพื่อจัดการเพื่อน พัก ซ่อน หรือออกจากแอป
 
-เก็บไฟล์ในโฟลเดอร์ไว้ด้วยกัน อย่าย้ายเฉพาะ `.exe` รุ่นนี้ยังไม่เซ็นแอป Windows อาจเตือนหรือจำกัดการเปิดตามนโยบายเครื่อง
+Portable เป็นไฟล์ `.exe` เดียว แต่ข้อมูลเพื่อนยังเก็บใน AppData ของเครื่อง รุ่นนี้ยังไม่เซ็นแอป Windows อาจเตือนหรือจำกัดการเปิดตามนโยบายเครื่อง
 
 ## MongBo X10
 
@@ -34,7 +34,7 @@
 
 ## อัปเดตและย้ายตัวละคร
 
-- **Desktop:** ออกจากแอป แล้วแตก ZIP รุ่นใหม่ ข้อมูลเดิมอยู่ที่ `%APPDATA%/MongBo`
+- **Desktop:** ออกจากแอป แล้วดาวน์โหลดและเปิด Portable.exe รุ่นใหม่แทน ข้อมูลเดิมอยู่ที่ `%APPDATA%/MongBo`
 - **X10:** แตก ZIP ใหม่ทับโฟลเดอร์เดิม กด **Reload ↻** ในหน้าส่วนขยาย แล้วรีเฟรชแท็บ อย่ากด Remove หากต้องการเก็บข้อมูลเดิม
 - เว็บ, Desktop และ Extension ใช้คลังแยกกัน ย้ายตัวละครด้วยการส่งออก/นำเข้า JSON ข้อมูลเก็บในเครื่อง ยังไม่มีบัญชีหรือ cloud sync
 

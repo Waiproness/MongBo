@@ -1,12 +1,13 @@
 {
   "name": "mongbo",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "private": true,
   "type": "module",
   "description": "MongBo — มองโบ๋ เพื่อนตัวเล็กสำหรับวันทำงาน",
   "scripts": {
     "desktop:build": "tsc -b && node scripts/build-desktop.mjs",
     "desktop:start": "electron dist/desktop-app",
+    "desktop:portable": "tsc -b && node scripts/build-desktop.mjs --pack --no-zip && electron-builder --win portable --x64 --prepackaged dist/desktop/MongBo-win32-x64 --config electron-builder.yml",
     "desktop:pack": "tsc -b && node scripts/build-desktop.mjs --pack",
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "build": "tsc -b && node scripts/build.mjs",
@@ -24,6 +25,7 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
     "electron": "45.0.0",
+    "electron-builder": "26.18.0",
     "typescript": "7.0.2",
     "vite": "8.3.5"
   },

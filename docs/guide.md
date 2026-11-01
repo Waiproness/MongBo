@@ -4,7 +4,16 @@
 
 React 19 + TypeScript + Vite. ตัวละคร SVG ต้นฉบับและส่วนขยาย Manifest V3 สำหรับ Brave / Chrome / Edge ไม่มีบัญชี เซิร์ฟเวอร์ข้อมูล หรือ AI API
 
-## MongBo Desktop — Windows x64
+## MongBo Desktop Portable — Windows x64
+
+ตั้งแต่ 0.10.1 ใช้ `MongBo-Portable-<version>-windows-x64.exe` ไฟล์เดียว ดาวน์โหลดแล้วเปิดได้เลย ไม่ต้องติดตั้งหรือแตก ZIP ตัว launcher จะเตรียมไฟล์ runtime ในโฟลเดอร์ชั่วคราวให้เอง แล้วล้างเมื่อออกจากแอป ข้อมูลยังอยู่ที่ `%APPDATA%/MongBo` และใช้ร่วมกับรุ่น Desktop เดิมได้
+
+สร้างด้วย `npm run desktop:portable` ผลลัพธ์อยู่ใน `dist/portable` ใช้ electron-builder portable target แบบสิทธิ์ผู้ใช้ทั่วไป ไม่สร้างตัวติดตั้ง ไม่เปิดตอนบูต และไม่เผยแพร่อัตโนมัติ
+
+Runtime ไม่รวม electron-builder ซึ่งเป็นเครื่องมือสำหรับ build เท่านั้น npm audit ของเครื่องมือ build มีคำเตือน moderate จาก minimatch ใน dependency เก่า จึงใช้เฉพาะ path และไฟล์ build ที่เชื่อถือได้ ไม่รับโครงการหรือ glob จากภายนอก ไม่มีการบังคับ downgrade หรือ override API ข้าม major เพื่อซ่อนคำเตือน
+
+### รุ่น ZIP / โฟลเดอร์เดิม (ยังสร้างได้ด้วย desktop:pack)
+
 
 รุ่นทดลองออฟไลน์ใช้ Electron พร้อมหน้าต่างโปร่งใสอยู่เหนือโปรแกรมอื่น พื้นที่ว่างคลิกทะลุ ตัวละครเดินบนขอบล่างของ work area เหนือ taskbar แสดงหลายตัวพร้อมกัน ลากและโยนแบบ projectile ได้
 

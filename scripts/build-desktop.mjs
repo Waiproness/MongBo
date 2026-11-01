@@ -28,6 +28,6 @@ if (process.argv.includes('--pack')) {
   await rm(resolve(target, 'resources/default_app.asar'), { force: true });
   await cp(output, resolve(target, 'resources/app'), { recursive: true });
   await cp(resolve(root, 'desktop/README.txt'), resolve(target, 'README.txt'));
-  execFileSync('python', [resolve(root, 'scripts/zip_desktop.py'), target, resolve(root, `dist/desktop/MongBo-${pkg.version}-windows-x64.zip`)], { stdio: 'inherit' });
+  if (!process.argv.includes('--no-zip')) execFileSync('python', [resolve(root, 'scripts/zip_desktop.py'), target, resolve(root, `dist/desktop/MongBo-${pkg.version}-windows-x64.zip`)], { stdio: 'inherit' });
   console.log(`Desktop executable: ${resolve(target, 'MongBo.exe')}`);
 }
