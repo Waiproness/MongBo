@@ -1,5 +1,6 @@
 import { build } from 'vite';
 import react from '@vitejs/plugin-react';
+import { editWindowsResources } from 'app-builder-lib/out/util/resEdit.js';
 import { cp, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -25,6 +26,7 @@ if (process.argv.includes('--pack')) {
   await rm(target, { recursive: true, force: true });
   await cp(resolve(root, 'node_modules/electron/dist'), target, { recursive: true });
   await rename(resolve(target, 'electron.exe'), resolve(target, 'MongBo.exe'));
+  await editWindowsResources({ file: resolve(target, 'MongBo.exe'), iconPath: resolve(root, 'desktop/icon.ico'), versionStrings: { FileDescription: 'MongBo', ProductName: 'MongBo', CompanyName: 'WaiTy' }, fileVersion: pkg.version, productVersion: pkg.version });
   await rm(resolve(target, 'resources/default_app.asar'), { force: true });
   await cp(output, resolve(target, 'resources/app'), { recursive: true });
   await cp(resolve(root, 'desktop/README.txt'), resolve(target, 'README.txt'));

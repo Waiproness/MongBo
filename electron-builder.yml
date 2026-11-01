@@ -6,6 +6,7 @@ directories:
 compression: maximum
 publish: null
 win:
+  icon: desktop/icon.ico
   target:
     - target: portable
       arch:

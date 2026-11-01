@@ -6,6 +6,8 @@ React 19 + TypeScript + Vite. ตัวละคร SVG ต้นฉบับแ
 
 ## MongBo Desktop Portable — Windows x64
 
+รุ่น 0.10.2 ฝังโลโก้มองโบ๋ใน EXE ทั้งตัว Portable และตัวแอปภายใน ไอคอน Windows ใช้ `desktop/icon.ico` หลายขนาด ส่วนหน้าต่างและ Tray ใช้ `desktop/icon.png`
+
 ตั้งแต่ 0.10.1 ใช้ `MongBo-Portable-<version>-windows-x64.exe` ไฟล์เดียว ดาวน์โหลดแล้วเปิดได้เลย ไม่ต้องติดตั้งหรือแตก ZIP ตัว launcher จะเตรียมไฟล์ runtime ในโฟลเดอร์ชั่วคราวให้เอง แล้วล้างเมื่อออกจากแอป ข้อมูลยังอยู่ที่ `%APPDATA%/MongBo` และใช้ร่วมกับรุ่น Desktop เดิมได้
 
 สร้างด้วย `npm run desktop:portable` ผลลัพธ์อยู่ใน `dist/portable` ใช้ electron-builder portable target แบบสิทธิ์ผู้ใช้ทั่วไป ไม่สร้างตัวติดตั้ง ไม่เปิดตอนบูต และไม่เผยแพร่อัตโนมัติ

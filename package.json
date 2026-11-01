@@ -1,6 +1,6 @@
 {
   "name": "mongbo",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "private": true,
   "type": "module",
   "description": "MongBo — มองโบ๋ เพื่อนตัวเล็กสำหรับวันทำงาน",
