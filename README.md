@@ -16,7 +16,8 @@
 
 Portable เป็นไฟล์ `.exe` เดียว แต่ข้อมูลเพื่อนยังเก็บใน AppData ของเครื่อง รุ่นนี้ยังไม่เซ็นแอป Windows อาจเตือนหรือจำกัดการเปิดตามนโยบายเครื่อง
 
-## MongBo X10
+## MongBo X10 (Browser Extension)
+ถ้าหากไม่มั่นใจความปลอดภัยในไฟล์ Mongzbo.exe สามารถติดตั้งใน Browser ได้ครับ
 
 1. [เปิดเว็บ MongBo](https://mongbo-8nr.pages.dev/) สร้างตัวละคร แล้วส่งออกเป็น `.mongbo.json`
 2. ดาวน์โหลด **Extension ZIP** แล้วแตกไฟล์ทั้งหมด
